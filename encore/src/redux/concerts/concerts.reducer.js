@@ -7,7 +7,11 @@ const initialState = {
   detailStatus: 'idle',
   listError: null,
   detailError: null,
+  reservationStatus: 'idle',
+  reservationError: null,
+  reservation: null,
   search: '',
+  genre: 'All',
 };
 
 export default function concertsReducer(state = initialState, action) {
@@ -24,8 +28,18 @@ export default function concertsReducer(state = initialState, action) {
       return { ...state, selected: action.payload, detailStatus: 'success', detailError: null };
     case CONCERT_ACTIONS.LOAD_ONE_FAILURE:
       return { ...state, detailStatus: 'error', detailError: action.payload };
+    case CONCERT_ACTIONS.RESERVE:
+      return { ...state, reservationStatus: 'loading', reservationError: null };
+    case CONCERT_ACTIONS.RESERVE_SUCCESS:
+      return { ...state, reservationStatus: 'success', reservationError: null, reservation: action.payload };
+    case CONCERT_ACTIONS.RESERVE_FAILURE:
+      return { ...state, reservationStatus: 'error', reservationError: action.payload };
+    case CONCERT_ACTIONS.RESET_RESERVATION:
+      return { ...state, reservationStatus: 'idle', reservationError: null, reservation: null };
     case CONCERT_ACTIONS.SET_SEARCH:
       return { ...state, search: action.payload };
+    case CONCERT_ACTIONS.SET_GENRE:
+      return { ...state, genre: action.payload };
     default:
       return state;
   }
