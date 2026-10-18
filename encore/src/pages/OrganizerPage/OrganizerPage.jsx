@@ -1,0 +1,7 @@
+import { Link } from 'react-router-dom';
+import { useConcerts } from '../../hooks/useConcerts';
+
+export default function OrganizerPage() {
+  const { concerts, listStatus, listError, retry } = useConcerts();
+  return <div className="encore-page"><div className="page-header"><div><p className="muted">Organizer studio</p><h1>Your concerts</h1></div><button className="accent-button" type="button">Create concert</button></div>{listStatus === 'loading' || listStatus === 'idle' ? <div className="state-panel" role="status"><p>Loading your concerts...</p></div> : null}{listStatus === 'error' ? <div className="state-panel" role="alert"><p>{listError}</p><button className="accent-button" type="button" onClick={retry}>Try again</button></div> : null}<div className="stats-grid"><div className="stat-card">Tickets sold<strong>248</strong></div><div className="stat-card">Total attendees<strong>186</strong></div><div className="stat-card">Active concerts<strong>{concerts.length}</strong></div></div>{listStatus === 'success' && !concerts.length ? <div className="state-panel"><p>No concerts created yet.</p></div> : null}<div className="event-grid">{concerts.slice(0, 2).map((concert) => <article className="event-card" key={concert.id}><div className="event-card-body"><p className="event-meta">{concert.date}</p><h2>{concert.title}</h2><p className="muted">Published · 124 views</p><Link className="outline-button" to={`/events/${concert.id}`}>Manage concert</Link></div></article>)}</div></div>;
+}
