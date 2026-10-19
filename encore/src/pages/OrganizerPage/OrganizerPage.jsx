@@ -6,6 +6,15 @@ import { useConcerts } from '../../hooks/useConcerts';
 export default function OrganizerPage() {
   const { listStatus, listError, retry } = useConcerts();
   const shows = useAppSelector(selectMyShows);
+  const getAvailability = (concert) => {
+    const capacity = Number(concert.capacity);
+    const reservedCount = Number(concert.reservedCount);
+    if (!Number.isFinite(capacity) || capacity <= 0 || !Number.isFinite(reservedCount)) {
+      return { label: 'Limited', percentage: 38 };
+    }
+    const percentage = Math.min(Math.round((reservedCount / capacity) * 100), 100);
+    return { label: percentage >= 80 ? 'Almost Full' : 'Limited', percentage };
+  };
 
   return (
     <div className="encore-page">
@@ -23,26 +32,41 @@ export default function OrganizerPage() {
       {shows.length > 0 && (
         <>
           <div className="results-heading"><h2>Published shows</h2><span className="muted">{shows.length} {shows.length === 1 ? 'show' : 'shows'}</span></div>
-          <div className="event-grid">
-            {shows.map((concert) => (
-              <article className="event-card collection-card show-owner-card" key={concert.id}>
-                <div className="collection-card-media">
-                  {concert.imageUrl ? <img className="event-art event-art-image" src={concert.imageUrl} alt="" /> : <div className="event-art" aria-hidden="true" />}
-                  <span className="collection-card-label">Published</span>
-                </div>
-                <div className="event-card-body collection-card-body">
-                  {concert.cancelled && <p className="status-badge">Cancelled</p>}
-                  <p className="collection-card-eyebrow">{concert.genre}</p>
-                  <h2>{concert.title}</h2>
-                  <p className="muted">{concert.date}</p>
-                  <p className="collection-card-location">{concert.location}</p>
-                  <div className="collection-card-footer">
-                    <span>{concert.reservedCount}{concert.capacity ? ` / ${concert.capacity}` : ''} reserved</span>
-                    <Link className="outline-button" to={`/events/${concert.id}`}>Manage show</Link>
+          <div className="reservation-list">
+            {shows.map((concert) => {
+              const availability = getAvailability(concert);
+              return (
+                <article className="reservation-row show-row" key={concert.id}>
+                  <div className="reservation-row-media">
+                    {concert.imageUrl ? <img src={concert.imageUrl} alt="" /> : <div className="event-art" aria-hidden="true" />}
                   </div>
-                </div>
-              </article>
-            ))}
+                  <div className="reservation-row-content">
+                    <div className="reservation-row-heading">
+                      <div>
+                        <p className="collection-card-eyebrow">{concert.genre}</p>
+                        <h2>{concert.title}</h2>
+                      </div>
+                      <span className={`reservation-status${concert.cancelled ? ' cancelled' : ''}`}>
+                        {concert.cancelled ? 'Cancelled' : 'Published'}
+                      </span>
+                    </div>
+                    <p className="muted">{concert.date} · {concert.location}</p>
+                    <div className="reservation-row-bottom">
+                      <div className="availability-meter" aria-label={`${availability.label}, ${availability.percentage}% capacity`}>
+                        <div className="availability-meter-label">
+                          <span>{availability.label}</span>
+                          <span>{concert.reservedCount}{concert.capacity ? ` / ${concert.capacity}` : ''} reserved</span>
+                        </div>
+                        <div className="availability-meter-track">
+                          <span style={{ width: `${availability.percentage}%` }} />
+                        </div>
+                      </div>
+                      <Link className="outline-button" to={`/events/${concert.id}`}>Manage show</Link>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </>
       )}

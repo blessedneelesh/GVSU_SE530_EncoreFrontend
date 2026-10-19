@@ -59,6 +59,7 @@
 .reservation-row-heading h2 { margin:0 0 8px; font:700 27px/1.1 Georgia,serif; }
 .reservation-row-heading .collection-card-eyebrow { margin-bottom:7px; }
 .reservation-status { flex:none; padding:7px 11px; border:1px solid rgba(255,173,0,.45); border-radius:999px; color:#ffad00; background:rgba(255,173,0,.08); font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+.reservation-status.cancelled { border-color:rgba(255,130,130,.45); color:#ffd6d6; background:rgba(92,37,44,.6); }
 .reservation-row-content > .muted { margin:0; }
 .reservation-row-bottom { display:flex; align-items:flex-end; gap:24px; margin-top:auto; }
 .availability-meter { flex:1; min-width:160px; }
