@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
-import { createComment, createConcert, loadConcerts, loadConcert, loadConcertComments, loadMyReservations, reserveConcert, resetReservation, setConcertGenre, setConcertSearch } from '../redux/concerts/concerts.actions';
+import { createComment, createConcert, loadConcerts, loadConcert, loadConcertAttendees, loadConcertComments, loadMyReservations, reserveConcert, resetReservation, setConcertGenre, setConcertSearch } from '../redux/concerts/concerts.actions';
 import {
   selectConcertDetailError,
   selectConcertDetailStatus,
@@ -23,6 +23,9 @@ import {
   selectReservations,
   selectReservationsStatus,
   selectReservationsError,
+  selectAttendees,
+  selectAttendeesStatus,
+  selectAttendeesError,
 } from '../redux/concerts/concerts.selectors';
 
 export function useConcerts(concertId) {
@@ -49,11 +52,15 @@ export function useConcerts(concertId) {
   const reservations = useAppSelector(selectReservations);
   const reservationsStatus = useAppSelector(selectReservationsStatus);
   const reservationsError = useAppSelector(selectReservationsError);
+  const attendees = useAppSelector(selectAttendees);
+  const attendeesStatus = useAppSelector(selectAttendeesStatus);
+  const attendeesError = useAppSelector(selectAttendeesError);
 
   useEffect(() => {
     if (concertId) {
       dispatch(loadConcert(concertId));
       dispatch(loadConcertComments(concertId));
+      dispatch(loadConcertAttendees(concertId));
     } else {
       dispatch(loadConcerts());
     }
@@ -81,6 +88,9 @@ export function useConcerts(concertId) {
     reservations,
     reservationsStatus,
     reservationsError,
+    attendees,
+    attendeesStatus,
+    attendeesError,
     setSearch: (value) => dispatch(setConcertSearch(value)),
     setGenre: (value) => dispatch(setConcertGenre(value)),
     retry: () => dispatch(concertId ? loadConcert(concertId) : loadConcerts()),

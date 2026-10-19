@@ -21,6 +21,9 @@ export const CONCERT_ACTIONS = {
   LOAD_RESERVATIONS: 'concerts/loadReservations',
   LOAD_RESERVATIONS_SUCCESS: 'concerts/loadReservationsSuccess',
   LOAD_RESERVATIONS_FAILURE: 'concerts/loadReservationsFailure',
+  LOAD_ATTENDEES: 'concerts/loadAttendees',
+  LOAD_ATTENDEES_SUCCESS: 'concerts/loadAttendeesSuccess',
+  LOAD_ATTENDEES_FAILURE: 'concerts/loadAttendeesFailure',
   SET_SEARCH: 'concerts/setSearch',
   SET_GENRE: 'concerts/setGenre',
 };

@@ -8,5 +8,6 @@ export const concertsApi = {
   reserveConcert: (concertId, reservation) => apiClient.post(API_ENDPOINTS.reservations(concertId), reservation).then(({ data }) => data),
   getConcertComments: (concertId) => apiClient.get(API_ENDPOINTS.comments(concertId)).then(({ data }) => data),
   createComment: (concertId, text) => apiClient.post(API_ENDPOINTS.comments(concertId), { text }).then(({ data }) => data),
+  getConcertAttendees: (concertId) => apiClient.get(API_ENDPOINTS.attendees(concertId)).then(({ data }) => data),
   getMyReservations: () => apiClient.get('../users/me/reservations').then(({ data }) => data),
 };

@@ -23,6 +23,9 @@ export const selectCommentsError = createSelector(selectConcertState, (state) =>
 export const selectReservations = createSelector(selectConcertState, (state) => state.reservations);
 export const selectReservationsStatus = createSelector(selectConcertState, (state) => state.reservationsStatus);
 export const selectReservationsError = createSelector(selectConcertState, (state) => state.reservationsError);
+export const selectAttendees = createSelector(selectConcertState, (state) => state.attendees);
+export const selectAttendeesStatus = createSelector(selectConcertState, (state) => state.attendeesStatus);
+export const selectAttendeesError = createSelector(selectConcertState, (state) => state.attendeesError);
 export const selectMyShows = createSelector(
   [selectConcerts, (state) => state.auth.user?.id],
   (concerts, userId) => userId ? concerts.filter((concert) => concert.ownerId === String(userId)) : [],

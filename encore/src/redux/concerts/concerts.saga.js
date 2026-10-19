@@ -92,6 +92,28 @@ function* loadReservationsWorker() {
   }
 }
 
+function* loadAttendeesWorker(action) {
+  try {
+    const response = yield call(concertsApi.getConcertAttendees, action.payload);
+    const items = Array.isArray(response) ? response : response?.attendees ?? response?.items ?? response?.data ?? [];
+    const attendees = Array.isArray(items) ? items.map((attendee) => ({
+      ...attendee,
+      id: attendee.id ?? attendee.user_id ?? attendee.userId,
+      name: attendee.username
+        ?? attendee.user_name
+        ?? attendee.userName
+        ?? attendee.name
+        ?? attendee.user?.name
+        ?? attendee.user?.username
+        ?? 'Encore guest',
+      seats: attendee.seats ?? attendee.quantity ?? attendee.seat_count ?? 0,
+    })) : [];
+    yield put({ type: CONCERT_ACTIONS.LOAD_ATTENDEES_SUCCESS, payload: { concertId: action.payload, attendees } });
+  } catch (error) {
+    yield put({ type: CONCERT_ACTIONS.LOAD_ATTENDEES_FAILURE, payload: getConcertErrorMessage(error) });
+  }
+}
+
 export default function* concertsSaga() {
   yield takeLatest(CONCERT_ACTIONS.LOAD, loadConcertsWorker);
   yield takeLatest(CONCERT_ACTIONS.LOAD_ONE, loadConcertWorker);
@@ -100,4 +122,5 @@ export default function* concertsSaga() {
   yield takeLatest(CONCERT_ACTIONS.COMMENT, createCommentWorker);
   yield takeLatest(CONCERT_ACTIONS.LOAD_COMMENTS, loadCommentsWorker);
   yield takeLatest(CONCERT_ACTIONS.LOAD_RESERVATIONS, loadReservationsWorker);
+  yield takeLatest(CONCERT_ACTIONS.LOAD_ATTENDEES, loadAttendeesWorker);
 }

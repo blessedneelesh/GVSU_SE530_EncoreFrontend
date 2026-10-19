@@ -108,6 +108,10 @@
 .attendee-summary strong { color:#ffad00; font-size:44px; }
 .attendee-summary span { color:#f4f1eb; font-weight:700; }
 .attendee-note { font-size:14px; }
+.attendee-list { display:grid; gap:10px; margin-top:24px; }
+.attendee-row { display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid #29283f; border-radius:12px; background:#11111d; }
+.attendee-row strong { flex:1; color:#f4f1eb; }
+.attendee-avatar { display:grid; width:34px; height:34px; place-items:center; border-radius:50%; color:#15120b; background:#ffad00; font-weight:700; }
 .event-empty-panel { padding-bottom:24px; }
 .event-empty-panel .outline-button:disabled { cursor:not-allowed; opacity:.6; }
 .comments-panel { max-width:720px; }

@@ -22,6 +22,9 @@ const initialState = {
   reservations: [],
   reservationsStatus: 'idle',
   reservationsError: null,
+  attendees: [],
+  attendeesStatus: 'idle',
+  attendeesError: null,
   search: '',
   genre: 'All',
 };
@@ -106,6 +109,12 @@ export default function concertsReducer(state = initialState, action) {
       return { ...state, reservationsStatus: 'success', reservationsError: null, reservations: action.payload };
     case CONCERT_ACTIONS.LOAD_RESERVATIONS_FAILURE:
       return { ...state, reservationsStatus: 'error', reservationsError: action.payload };
+    case CONCERT_ACTIONS.LOAD_ATTENDEES:
+      return { ...state, attendees: [], attendeesStatus: 'loading', attendeesError: null };
+    case CONCERT_ACTIONS.LOAD_ATTENDEES_SUCCESS:
+      return { ...state, attendees: action.payload.attendees, attendeesStatus: 'success', attendeesError: null };
+    case CONCERT_ACTIONS.LOAD_ATTENDEES_FAILURE:
+      return { ...state, attendees: [], attendeesStatus: 'error', attendeesError: action.payload };
     case CONCERT_ACTIONS.SET_SEARCH:
       return { ...state, search: action.payload };
     case CONCERT_ACTIONS.SET_GENRE:

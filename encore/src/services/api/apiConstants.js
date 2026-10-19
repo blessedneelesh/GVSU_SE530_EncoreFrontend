@@ -6,4 +6,5 @@ export const API_ENDPOINTS = {
   concert: (concertId) => `${encodeURIComponent(concertId)}/`,
   reservations: (concertId) => `${encodeURIComponent(concertId)}/reservations`,
   comments: (concertId) => `${encodeURIComponent(concertId)}/comments`,
+  attendees: (concertId) => `${encodeURIComponent(concertId)}/attendees`,
 };

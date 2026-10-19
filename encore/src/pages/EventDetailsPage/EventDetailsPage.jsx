@@ -17,6 +17,9 @@ export default function EventDetailsPage() {
     commentStatus,
     commentError,
     commentsStatus,
+    attendees,
+    attendeesStatus,
+    attendeesError,
   } = useConcerts(eventId);
   const [imageFailed, setImageFailed] = useState(false);
   const [activeTab, setActiveTab] = useState('about');
@@ -176,19 +179,23 @@ export default function EventDetailsPage() {
           </div>
         )}
         {activeTab === 'attendees' && (
-          <div className="event-tab-panel" id="attendees-panel" role="tabpanel" aria-labelledby="attendees-tab" tabIndex="0">
-            <p className="eyebrow">The crowd</p>
-            <h2>Join the audience.</h2>
-            <p className="muted">
-              {concert.reservedCount === 0
-                ? 'Be the first to reserve a spot for this event.'
-                : `${concert.reservedCount} ${concert.reservedCount === 1 ? 'person has' : 'people have'} reserved a spot.`}
-            </p>
-            <div className="attendee-summary">
-              <strong>{concert.reservedCount}</strong>
-              <span>registered attendees</span>
-            </div>
-            <p className="muted attendee-note">Attendee profiles will appear here when attendee details are available.</p>
+          <div className={`event-tab-panel${attendeesStatus === 'success' && attendees.length === 0 ? ' attendees-empty-panel' : ''}`} id="attendees-panel" role="tabpanel" aria-labelledby="attendees-tab" tabIndex="0">
+            {attendeesStatus === 'loading' ? <p className="muted" role="status">Loading attendees...</p> : null}
+            {attendeesStatus === 'error' ? <p className="form-error" role="alert">{attendeesError}</p> : null}
+            {attendeesStatus === 'success' && attendees.length === 0 ? (
+              <p className="muted">No attendees yet. Be the first to reserve.</p>
+            ) : null}
+            {attendees.length > 0 && (
+              <div className="attendee-list" aria-label="Attendees who booked tickets">
+                {attendees.map((attendee) => (
+                  <div className="attendee-row" key={attendee.id ?? attendee.name}>
+                    <span className="attendee-avatar" aria-hidden="true">{attendee.name.charAt(0).toUpperCase()}</span>
+                    <strong>{attendee.name.charAt(0).toUpperCase() + attendee.name.slice(1)}</strong>
+                    <span className="muted">{attendee.seats} {attendee.seats === 1 ? 'seat' : 'seats'}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
         {activeTab === 'comments' && (
