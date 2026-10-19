@@ -13,11 +13,16 @@ export default function EventDetailsPage() {
     reservationStatus,
     reservationError,
     resetReservation,
+    comment,
+    commentStatus,
+    commentError,
+    commentsStatus,
   } = useConcerts(eventId);
   const [imageFailed, setImageFailed] = useState(false);
   const [activeTab, setActiveTab] = useState('about');
   const [isReservationOpen, setIsReservationOpen] = useState(false);
   const [seatCount, setSeatCount] = useState(1);
+  const [commentText, setCommentText] = useState('');
   const closeButtonRef = useRef(null);
 
   useEffect(() => {
@@ -43,6 +48,9 @@ export default function EventDetailsPage() {
   const availability = concert.capacity === null
     ? 'Capacity information unavailable'
     : `${concert.reservedCount} of ${concert.capacity} spots reserved`;
+  const comments = Array.isArray(concert.comments) ? concert.comments : [];
+  const commentCount = comments.length;
+  const hasCommentText = commentText.trim().length > 0;
 
   return (
     <article className="event-details">
@@ -108,7 +116,7 @@ export default function EventDetailsPage() {
                   <span>{concert.location}</span>
                 </div>
                 {reservationError && <p className="form-error" role="alert">{reservationError}</p>}
-                <form className="reservation-form" onSubmit={(event) => { event.preventDefault(); reserve({ quantity: seatCount }); }}>
+                <form className="reservation-form" onSubmit={(event) => { event.preventDefault(); reserve({ seats: seatCount }); }}>
                   <fieldset className="seat-selection">
                     <legend>How many seats?</legend>
                     <div className="seat-options">
@@ -144,7 +152,7 @@ export default function EventDetailsPage() {
           {[
             ['about', 'About'],
             ['attendees', 'Attendees'],
-            ['comments', 'Comments'],
+            ['comments', `Comments (${commentCount})`],
           ].map(([tabId, label]) => (
             <button
               className={`event-tab${activeTab === tabId ? ' active' : ''}`}
@@ -184,11 +192,57 @@ export default function EventDetailsPage() {
           </div>
         )}
         {activeTab === 'comments' && (
-          <div className="event-tab-panel event-empty-panel" id="comments-panel" role="tabpanel" aria-labelledby="comments-tab" tabIndex="0">
+          <div className="event-tab-panel comments-panel" id="comments-panel" role="tabpanel" aria-labelledby="comments-tab" tabIndex="0">
             <p className="eyebrow">Community</p>
-            <h2>No comments yet.</h2>
-            <p className="muted">Be the first to share what you are looking forward to.</p>
-            <button className="outline-button" type="button" disabled>Comments coming soon</button>
+            <h2>Join the conversation.</h2>
+            {commentsStatus === 'loading' ? (
+              <p className="muted comments-empty" role="status">Loading comments...</p>
+            ) : comments.length === 0 ? (
+              <p className="muted comments-empty">no comments yet. Start the converation</p>
+            ) : (
+              <div className="comments-list" aria-label="Show comments">
+                {comments.map((item, index) => {
+                  const text = typeof item === 'string'
+                    ? item
+                    : item.text ?? item.comment ?? item.content ?? item.body ?? '';
+                  return (
+                    <article className="comment-card" key={item.id ?? `${text}-${index}`}>
+                      <div className="comment-card-heading">
+                        <strong>{item.username ?? item.author_name ?? item.authorName ?? item.user?.name ?? 'Encore guest'}</strong>
+                        {item.created_at && <time dateTime={item.created_at}>{new Date(item.created_at).toLocaleDateString()}</time>}
+                      </div>
+                      <p>{text}</p>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+            <form className="comment-form" onSubmit={(event) => {
+              event.preventDefault();
+              const value = commentText.trim();
+              if (value && commentStatus !== 'loading') {
+                comment(value);
+                setCommentText('');
+              }
+            }}>
+              <label htmlFor="show-comment">Share your thoughts</label>
+              <textarea
+                id="show-comment"
+                value={commentText}
+                onChange={(event) => setCommentText(event.target.value)}
+                placeholder="Write a comment..."
+                rows="4"
+                maxLength="1000"
+                disabled={commentStatus === 'loading'}
+              />
+              {commentError && <p className="form-error" role="alert">{commentError}</p>}
+              <div className="comment-form-footer">
+                <span>{commentText.length}/1000</span>
+                <button className="accent-button" type="submit" disabled={!hasCommentText || commentStatus === 'loading'}>
+                  {commentStatus === 'loading' ? 'Posting...' : 'Post comment'}
+                </button>
+              </div>
+            </form>
           </div>
         )}
       </section>

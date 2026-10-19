@@ -5,7 +5,7 @@
 .app-nav a, .header-profile { display:inline-flex; align-items:center; gap:7px; color:#aaa6be; text-decoration:none; }
 .app-nav a { padding:9px 12px; border-radius:9px; }
 .app-nav a:hover, .app-nav a:focus-visible, .app-nav a.active, .header-profile:hover { color:#ffad00; background:#171627; }
-.header-profile { margin-left:auto; border:1px solid #29283f; border-radius:999px; padding:8px 14px; }
+.header-profile { margin-left:auto; border:1px solid #29283f; border-radius:999px; padding:8px 14px; background:transparent; cursor:pointer; font:inherit; }
 .app-content { max-width:1200px; margin:0 auto; padding:40px 6vw 64px; }
 .page-header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:24px; }
 .page-header h1 { margin:0; color:#f4f1eb; }
@@ -76,6 +76,20 @@
 .attendee-note { font-size:14px; }
 .event-empty-panel { padding-bottom:24px; }
 .event-empty-panel .outline-button:disabled { cursor:not-allowed; opacity:.6; }
+.comments-panel { max-width:720px; }
+.comments-empty { margin:24px 0 30px; text-transform:none; }
+.comments-list { display:grid; gap:12px; margin:24px 0 30px; }
+.comment-card { padding:16px 18px; border:1px solid #4b4766; border-radius:14px; background:#11111d; }
+.comment-card-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+.comment-card-heading strong { color:#f4f1eb; }
+.comment-card-heading time { color:#918da9; font-size:12px; }
+.comment-card p { margin:10px 0 0; color:#aaa6be; line-height:1.55; white-space:pre-wrap; }
+.comment-form { display:grid; gap:10px; margin-top:30px; padding:22px; border:1px solid #4b4766; border-radius:16px; background:#171627; }
+.comment-form label { color:#f4f1eb; font-weight:700; }
+.comment-form textarea { width:100%; box-sizing:border-box; min-height:112px; resize:vertical; padding:14px; border:1px solid #4b4766; border-radius:10px; color:#f4f1eb; background:#11111d; font:inherit; line-height:1.5; }
+.comment-form textarea:focus { border-color:#ffad00; outline:2px solid rgba(255,173,0,.25); }
+.comment-form-footer { display:flex; align-items:center; justify-content:space-between; gap:16px; color:#918da9; font-size:12px; }
+.comment-form .accent-button:disabled { cursor:not-allowed; opacity:.45; }
 .modal-backdrop { position:fixed; z-index:10; inset:0; display:grid; place-items:center; padding:24px; background:rgba(4,4,10,.78); }
 .reservation-modal { position:relative; width:min(100%, 500px); padding:34px; border:1px solid #4b4766; border-radius:22px; color:#f4f1eb; background:#171627; box-shadow:0 24px 80px rgba(0,0,0,.5); }
 .modal-close { position:absolute; top:14px; right:16px; border:0; color:#aaa6be; background:transparent; cursor:pointer; font-size:28px; line-height:1; }
@@ -112,6 +126,21 @@
 .state-panel { padding:48px 16px; text-align:center; color:#aaa6be; }
 .search-row { display:flex; gap:12px; align-items:center; margin-bottom:24px; }
 .search-row > *:first-child { flex:1; }
+.post-show-page { max-width:760px; }
+.post-show-heading { margin-bottom:28px; }
+.post-show-heading h1 { margin:0 0 8px; font:700 clamp(36px,6vw,52px)/1 Georgia,serif; }
+.show-form { display:grid; gap:20px; }
+.show-form-card { padding:28px; border:1px solid #29283f; border-radius:18px; background:#11111d; }
+.show-form-field label, .cover-upload > label { display:block; margin:0 0 8px; color:#f4f1eb; font-size:13px; font-weight:700; }
+.form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.show-form-actions { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding-top:4px; }
+.show-form-actions > * { width:100%; box-sizing:border-box; text-align:center; }
+.field-hint { margin:7px 0 0; color:#918da9; font-size:12px; }
+.cover-upload { display:grid; gap:10px; }
+.cover-preview { display:grid; min-height:150px; place-items:center; border:1px dashed #4b4766; border-radius:12px; color:#918da9; background:linear-gradient(135deg,#171627,#29213d); background-position:center; background-size:cover; font-size:32px; }
+.cover-preview.has-image { border-style:solid; }
+.show-success { padding:24px; border:1px solid #496c4d; border-radius:16px; background:#17251b; }
+.show-success h2 { margin:0 0 8px; color:#b6e2bb; }
 @media (max-width:640px) {
   .app-header { flex-wrap:wrap; gap:12px; }
   .app-nav { order:3; width:100%; justify-content:space-between; }
@@ -125,4 +154,7 @@
   .availability-count { text-align:left; }
   .modal-backdrop { align-items:end; padding:0; }
   .reservation-modal { width:100%; padding:28px 22px 24px; border-radius:22px 22px 0 0; }
+  .form-grid { grid-template-columns:1fr; gap:0; }
+  .show-form-card { padding:20px; }
+  .show-form-actions { grid-template-columns:1fr; }
 }

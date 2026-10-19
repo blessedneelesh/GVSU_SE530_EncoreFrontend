@@ -32,8 +32,69 @@ function* reserveConcertWorker(action) {
   }
 }
 
+function* createConcertWorker(action) {
+  try {
+    const response = yield call(concertsApi.createConcert, action.payload);
+    yield put({ type: CONCERT_ACTIONS.CREATE_SUCCESS, payload: mapConcert(response) });
+  } catch (error) {
+    yield put({ type: CONCERT_ACTIONS.CREATE_FAILURE, payload: getConcertErrorMessage(error) });
+  }
+}
+
+function* createCommentWorker(action) {
+  try {
+    const { concertId, comment } = action.payload;
+    const response = yield call(concertsApi.createComment, concertId, comment);
+    const createdComment = response?.comment ?? response?.data?.comment ?? response;
+    yield put({ type: CONCERT_ACTIONS.COMMENT_SUCCESS, payload: { concertId, comment: createdComment } });
+  } catch (error) {
+    yield put({ type: CONCERT_ACTIONS.COMMENT_FAILURE, payload: getConcertErrorMessage(error) });
+  }
+}
+
+function* loadCommentsWorker(action) {
+  try {
+    const response = yield call(concertsApi.getConcertComments, action.payload);
+    yield put({
+      type: CONCERT_ACTIONS.LOAD_COMMENTS_SUCCESS,
+      payload: { concertId: action.payload, comments: Array.isArray(response) ? response : [] },
+    });
+  } catch (error) {
+    yield put({ type: CONCERT_ACTIONS.LOAD_COMMENTS_FAILURE, payload: getConcertErrorMessage(error) });
+  }
+}
+
+function* loadReservationsWorker() {
+  try {
+    const response = yield call(concertsApi.getMyReservations);
+    const items = Array.isArray(response) ? response : response?.items ?? response?.reservations ?? response?.data ?? [];
+    const reservations = Array.isArray(items) ? items.map((reservation) => {
+      const concert = reservation.concert ?? reservation.show ?? reservation;
+      return {
+        ...reservation,
+        concertId: String(reservation.concert_id ?? concert.id ?? ''),
+        title: concert.title ?? concert.name ?? 'Reserved show',
+        date: concert.date,
+        time: concert.time,
+        venue: concert.venue,
+        location: concert.location ?? [concert.venue, concert.city, concert.state].filter(Boolean).join(', '),
+        genre: concert.genre ?? concert.category ?? 'Live music',
+        imageUrl: concert.image_url ?? concert.imageUrl ?? '',
+        seats: reservation.seats ?? reservation.quantity ?? 0,
+      };
+    }) : [];
+    yield put({ type: CONCERT_ACTIONS.LOAD_RESERVATIONS_SUCCESS, payload: reservations });
+  } catch (error) {
+    yield put({ type: CONCERT_ACTIONS.LOAD_RESERVATIONS_FAILURE, payload: getConcertErrorMessage(error) });
+  }
+}
+
 export default function* concertsSaga() {
   yield takeLatest(CONCERT_ACTIONS.LOAD, loadConcertsWorker);
   yield takeLatest(CONCERT_ACTIONS.LOAD_ONE, loadConcertWorker);
   yield takeLatest(CONCERT_ACTIONS.RESERVE, reserveConcertWorker);
+  yield takeLatest(CONCERT_ACTIONS.CREATE, createConcertWorker);
+  yield takeLatest(CONCERT_ACTIONS.COMMENT, createCommentWorker);
+  yield takeLatest(CONCERT_ACTIONS.LOAD_COMMENTS, loadCommentsWorker);
+  yield takeLatest(CONCERT_ACTIONS.LOAD_RESERVATIONS, loadReservationsWorker);
 }
