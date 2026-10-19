@@ -10,6 +10,7 @@ const authClient = axios.create({
 
 export const authApi = {
   login: (credentials) => authClient.post('login', credentials).then(({ data }) => data),
+  register: (payload) => authClient.post('register', payload).then(({ data }) => data),
   refresh: (refreshToken) => authClient.post('refresh', { refresh_token: refreshToken }).then(({ data }) => data),
   getCurrentUser: (accessToken) => authClient.get('../users/me', {
     headers: { Authorization: `Bearer ${accessToken}` },

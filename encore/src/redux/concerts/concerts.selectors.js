@@ -26,6 +26,9 @@ export const selectReservationsError = createSelector(selectConcertState, (state
 export const selectAttendees = createSelector(selectConcertState, (state) => state.attendees);
 export const selectAttendeesStatus = createSelector(selectConcertState, (state) => state.attendeesStatus);
 export const selectAttendeesError = createSelector(selectConcertState, (state) => state.attendeesError);
+export const selectLocationWeather = createSelector(selectConcertState, (state) => state.locationWeather);
+export const selectLocationWeatherStatus = createSelector(selectConcertState, (state) => state.locationWeatherStatus);
+export const selectLocationWeatherError = createSelector(selectConcertState, (state) => state.locationWeatherError);
 export const selectMyShows = createSelector(
   [selectConcerts, (state) => state.auth.user?.id],
   (concerts, userId) => userId ? concerts.filter((concert) => concert.ownerId === String(userId)) : [],

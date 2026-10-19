@@ -17,3 +17,7 @@ export const createComment = (concertId, comment) => ({
 export const loadConcertComments = (concertId) => ({ type: CONCERT_ACTIONS.LOAD_COMMENTS, payload: concertId });
 export const loadMyReservations = () => ({ type: CONCERT_ACTIONS.LOAD_RESERVATIONS });
 export const loadConcertAttendees = (concertId) => ({ type: CONCERT_ACTIONS.LOAD_ATTENDEES, payload: concertId });
+export const loadConcertLocationWeather = (concertId) => ({
+  type: CONCERT_ACTIONS.LOAD_LOCATION_WEATHER,
+  payload: concertId,
+});

@@ -2,7 +2,7 @@ import { call, put, takeLatest } from 'redux-saga/effects';
 import { CONCERT_ACTIONS } from './concerts.constants';
 import { concertsApi } from '../../services/concerts/concerts.api';
 import { getConcertErrorMessage } from '../../services/concerts/concerts.errors';
-import { mapConcert, mapConcertCollection } from '../../services/concerts/concerts.mappers';
+import { mapConcert, mapConcertCollection, mapLocationWeather } from '../../services/concerts/concerts.mappers';
 
 function* loadConcertsWorker(action) {
   try {
@@ -27,6 +27,9 @@ function* reserveConcertWorker(action) {
     const { concertId, reservation } = action.payload;
     const response = yield call(concertsApi.reserveConcert, concertId, reservation);
     yield put({ type: CONCERT_ACTIONS.RESERVE_SUCCESS, payload: response });
+    // Refresh concert details and attendees list after reserving
+    yield put({ type: CONCERT_ACTIONS.LOAD_ONE, payload: concertId });
+    yield put({ type: CONCERT_ACTIONS.LOAD_ATTENDEES, payload: concertId });
   } catch (error) {
     yield put({ type: CONCERT_ACTIONS.RESERVE_FAILURE, payload: getConcertErrorMessage(error) });
   }
@@ -114,6 +117,21 @@ function* loadAttendeesWorker(action) {
   }
 }
 
+function* loadLocationWeatherWorker(action) {
+  try {
+    const response = yield call(concertsApi.getConcertLocationWeather, action.payload);
+    yield put({
+      type: CONCERT_ACTIONS.LOAD_LOCATION_WEATHER_SUCCESS,
+      payload: mapLocationWeather(response),
+    });
+  } catch (error) {
+    yield put({
+      type: CONCERT_ACTIONS.LOAD_LOCATION_WEATHER_FAILURE,
+      payload: getConcertErrorMessage(error),
+    });
+  }
+}
+
 export default function* concertsSaga() {
   yield takeLatest(CONCERT_ACTIONS.LOAD, loadConcertsWorker);
   yield takeLatest(CONCERT_ACTIONS.LOAD_ONE, loadConcertWorker);
@@ -123,4 +141,5 @@ export default function* concertsSaga() {
   yield takeLatest(CONCERT_ACTIONS.LOAD_COMMENTS, loadCommentsWorker);
   yield takeLatest(CONCERT_ACTIONS.LOAD_RESERVATIONS, loadReservationsWorker);
   yield takeLatest(CONCERT_ACTIONS.LOAD_ATTENDEES, loadAttendeesWorker);
+  yield takeLatest(CONCERT_ACTIONS.LOAD_LOCATION_WEATHER, loadLocationWeatherWorker);
 }

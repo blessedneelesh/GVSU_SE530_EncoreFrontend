@@ -20,6 +20,9 @@ export default function EventDetailsPage() {
     attendees,
     attendeesStatus,
     attendeesError,
+    locationWeather,
+    locationWeatherStatus,
+    locationWeatherError,
   } = useConcerts(eventId);
   const [imageFailed, setImageFailed] = useState(false);
   const [activeTab, setActiveTab] = useState('about');
@@ -54,25 +57,85 @@ export default function EventDetailsPage() {
   const comments = Array.isArray(concert.comments) ? concert.comments : [];
   const commentCount = comments.length;
   const hasCommentText = commentText.trim().length > 0;
+  const moodTheme = concert.moodTheme || { label: concert.mood || 'Happy', color: '#facc15', bg: 'rgba(250, 204, 21, 0.14)', border: '#eab308' };
 
   return (
     <article className="event-details">
       <Link className="back-link" to="/discover">← Back to discover</Link>
       <section className="event-hero" aria-labelledby="concert-title">
-        <div className="event-hero-art">
+        <div className="event-hero-art" style={{ borderColor: moodTheme.border }}>
           {concert.imageUrl && !imageFailed
             ? <img className="event-art-image" src={concert.imageUrl} alt="" onError={() => setImageFailed(true)} />
             : <div className="event-art" aria-hidden="true" />}
           <span className="event-genre">{concert.genre}</span>
         </div>
         <div className="event-hero-copy">
-          {concert.cancelled && <p className="status-badge">Cancelled</p>}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
+            {concert.cancelled && <p className="status-badge" style={{ margin: 0 }}>Cancelled</p>}
+            <span
+              style={{
+                display: 'inline-block',
+                padding: '4px 10px',
+                borderRadius: '999px',
+                fontSize: '12px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '.06em',
+                color: moodTheme.color,
+                background: moodTheme.bg,
+                border: `1px solid ${moodTheme.border}`,
+              }}
+            >
+              Mood: {moodTheme.label}
+            </span>
+          </div>
           <p className="eyebrow">Live at Encore</p>
           <h1 id="concert-title">{concert.title}</h1>
           <p className="event-lede">{concert.description}</p>
           <div className="event-facts">
-            <div><span className="fact-label">When</span><strong>{concert.date}</strong></div>
-            <div><span className="fact-label">Where</span><strong>{concert.location}</strong></div>
+            <div style={{ borderLeftColor: moodTheme.border }}>
+              <span className="fact-label">When</span>
+              <strong>{concert.date}</strong>
+            </div>
+            <div style={{ borderLeftColor: moodTheme.border }}>
+              <span className="fact-label">Where</span>
+              <strong>{concert.location}</strong>
+              {locationWeather?.location?.googleMapsUrl && (
+                <a
+                  href={locationWeather.location.googleMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ display: 'inline-block', marginTop: '6px', color: '#ffad00', fontSize: '13px', fontWeight: 700 }}
+                >
+                  📍 View on Google Maps ↗
+                </a>
+              )}
+            </div>
+            <div style={{ borderLeftColor: moodTheme.border }}>
+              <span className="fact-label">Live Venue Weather</span>
+              {locationWeatherStatus === 'loading' && <strong>Loading forecast...</strong>}
+              {locationWeatherStatus === 'error' && <strong className="muted">{locationWeatherError || 'Weather unavailable'}</strong>}
+              {locationWeatherStatus === 'success' && locationWeather?.weather && (
+                <strong>
+                  {locationWeather.weather.condition} · {locationWeather.weather.temperatureFahrenheit}°F ({locationWeather.weather.temperatureCelsius}°C)
+                </strong>
+              )}
+            </div>
+            <div style={{ borderLeftColor: moodTheme.border }}>
+              <span className="fact-label">Wind & Coordinates</span>
+              {locationWeatherStatus === 'success' && locationWeather ? (
+                <strong>
+                  Wind {locationWeather.weather.windspeedKmh} km/h
+                  {locationWeather.location.latitude !== null && (
+                    <span className="muted" style={{ display: 'block', fontSize: '12px', fontWeight: 400 }}>
+                      ({Number(locationWeather.location.latitude).toFixed(4)}, {Number(locationWeather.location.longitude).toFixed(4)})
+                    </span>
+                  )}
+                </strong>
+              ) : (
+                <strong>—</strong>
+              )}
+            </div>
           </div>
         </div>
       </section>

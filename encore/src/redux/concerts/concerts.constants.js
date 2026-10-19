@@ -24,6 +24,9 @@ export const CONCERT_ACTIONS = {
   LOAD_ATTENDEES: 'concerts/loadAttendees',
   LOAD_ATTENDEES_SUCCESS: 'concerts/loadAttendeesSuccess',
   LOAD_ATTENDEES_FAILURE: 'concerts/loadAttendeesFailure',
+  LOAD_LOCATION_WEATHER: 'concerts/loadLocationWeather',
+  LOAD_LOCATION_WEATHER_SUCCESS: 'concerts/loadLocationWeatherSuccess',
+  LOAD_LOCATION_WEATHER_FAILURE: 'concerts/loadLocationWeatherFailure',
   SET_SEARCH: 'concerts/setSearch',
   SET_GENRE: 'concerts/setGenre',
 };
