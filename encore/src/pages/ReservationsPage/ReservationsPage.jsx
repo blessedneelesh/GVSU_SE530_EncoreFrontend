@@ -9,6 +9,15 @@ export default function ReservationsPage() {
     reservationsError,
     loadReservations,
   } = useConcerts();
+  const getAvailability = (reservation) => {
+    const capacity = Number(reservation.capacity);
+    const reservedCount = Number(reservation.reservedCount);
+    if (!Number.isFinite(capacity) || capacity <= 0 || !Number.isFinite(reservedCount)) {
+      return { label: 'Limited', percentage: 38 };
+    }
+    const percentage = Math.min(Math.round((reservedCount / capacity) * 100), 100);
+    return { label: percentage >= 80 ? 'Almost Full' : 'Limited', percentage };
+  };
 
   useEffect(() => {
     loadReservations();
@@ -46,19 +55,34 @@ export default function ReservationsPage() {
             <h2>Upcoming shows</h2>
             <span className="muted">{reservations.length} {reservations.length === 1 ? 'reservation' : 'reservations'}</span>
           </div>
-          <div className="event-grid">
-            {reservations.map((reservation, index) => (
-              <article className="event-card" key={reservation.id ?? `${reservation.concertId}-${index}`}>
-                {reservation.imageUrl ? <img className="event-art event-art-image" src={reservation.imageUrl} alt="" /> : <div className="event-art" aria-hidden="true" />}
-                <div className="event-card-body">
-                  <p className="event-meta">{reservation.date ?? 'Date to be announced'}</p>
-                  <h2>{reservation.title}</h2>
-                  <p className="muted">{reservation.location || reservation.venue || 'Location to be announced'}</p>
-                  <p className="muted">{reservation.seats} {reservation.seats === 1 ? 'seat' : 'seats'} reserved</p>
-                  <Link className="outline-button" to={`/events/${reservation.concertId}`}>View show</Link>
-                </div>
-              </article>
-            ))}
+          <div className="reservation-list">
+            {reservations.map((reservation, index) => {
+              const availability = getAvailability(reservation);
+              return (
+                <article className="reservation-row" key={reservation.id ?? `${reservation.concertId}-${index}`}>
+                  <div className="reservation-row-media">
+                    {reservation.imageUrl ? <img src={reservation.imageUrl} alt="" /> : <div className="event-art" aria-hidden="true" />}
+                  </div>
+                  <div className="reservation-row-content">
+                    <div className="reservation-row-heading">
+                      <div>
+                        <p className="collection-card-eyebrow">{reservation.genre}</p>
+                        <h2>{reservation.title}</h2>
+                      </div>
+                      <span className="reservation-status">{reservation.cancelled ? 'Cancelled' : 'Reserved'}</span>
+                    </div>
+                    <p className="muted">{reservation.date ?? 'Date to be announced'} · {reservation.location || reservation.venue || 'Location to be announced'}</p>
+                    <div className="reservation-row-bottom">
+                      <div className="availability-meter" aria-label={`${availability.label}, ${availability.percentage}% capacity`}>
+                        <div className="availability-meter-label"><span>{availability.label}</span><span>{reservation.seats} {reservation.seats === 1 ? 'seat' : 'seats'} reserved</span></div>
+                        <div className="availability-meter-track"><span style={{ width: `${availability.percentage}%` }} /></div>
+                      </div>
+                      <Link className="outline-button" to={`/events/${reservation.concertId}`}>View show</Link>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </>
       )}

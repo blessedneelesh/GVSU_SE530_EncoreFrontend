@@ -81,6 +81,9 @@ function* loadReservationsWorker() {
         genre: concert.genre ?? concert.category ?? 'Live music',
         imageUrl: concert.image_url ?? concert.imageUrl ?? '',
         seats: reservation.seats ?? reservation.quantity ?? 0,
+        capacity: concert.capacity ?? reservation.capacity ?? null,
+        reservedCount: concert.reserved_count ?? concert.reservedCount ?? reservation.reserved_count ?? null,
+        cancelled: Boolean(concert.cancelled ?? reservation.cancelled),
       };
     }) : [];
     yield put({ type: CONCERT_ACTIONS.LOAD_RESERVATIONS_SUCCESS, payload: reservations });

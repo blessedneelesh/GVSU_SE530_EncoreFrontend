@@ -25,14 +25,21 @@ export default function OrganizerPage() {
           <div className="results-heading"><h2>Published shows</h2><span className="muted">{shows.length} {shows.length === 1 ? 'show' : 'shows'}</span></div>
           <div className="event-grid">
             {shows.map((concert) => (
-              <article className="event-card" key={concert.id}>
-                {concert.imageUrl ? <img className="event-art event-art-image" src={concert.imageUrl} alt="" /> : <div className="event-art" aria-hidden="true" />}
-                <div className="event-card-body">
+              <article className="event-card collection-card show-owner-card" key={concert.id}>
+                <div className="collection-card-media">
+                  {concert.imageUrl ? <img className="event-art event-art-image" src={concert.imageUrl} alt="" /> : <div className="event-art" aria-hidden="true" />}
+                  <span className="collection-card-label">Published</span>
+                </div>
+                <div className="event-card-body collection-card-body">
                   {concert.cancelled && <p className="status-badge">Cancelled</p>}
-                  <p className="event-meta">{concert.date}</p>
+                  <p className="collection-card-eyebrow">{concert.genre}</p>
                   <h2>{concert.title}</h2>
-                  <p className="muted">{concert.genre} · {concert.reservedCount}{concert.capacity ? `/${concert.capacity} reserved` : ' reserved'}</p>
-                  <Link className="outline-button" to={`/events/${concert.id}`}>Manage show</Link>
+                  <p className="muted">{concert.date}</p>
+                  <p className="collection-card-location">{concert.location}</p>
+                  <div className="collection-card-footer">
+                    <span>{concert.reservedCount}{concert.capacity ? ` / ${concert.capacity}` : ''} reserved</span>
+                    <Link className="outline-button" to={`/events/${concert.id}`}>Manage show</Link>
+                  </div>
                 </div>
               </article>
             ))}
