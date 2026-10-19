@@ -13,6 +13,23 @@ export const selectConcertDetailError = createSelector(selectConcertState, (stat
 export const selectReservationStatus = createSelector(selectConcertState, (state) => state.reservationStatus);
 export const selectReservationError = createSelector(selectConcertState, (state) => state.reservationError);
 export const selectReservation = createSelector(selectConcertState, (state) => state.reservation);
+export const selectCreateStatus = createSelector(selectConcertState, (state) => state.createStatus);
+export const selectCreateError = createSelector(selectConcertState, (state) => state.createError);
+export const selectCreatedConcert = createSelector(selectConcertState, (state) => state.createdConcert);
+export const selectCommentStatus = createSelector(selectConcertState, (state) => state.commentStatus);
+export const selectCommentError = createSelector(selectConcertState, (state) => state.commentError);
+export const selectCommentsStatus = createSelector(selectConcertState, (state) => state.commentsStatus);
+export const selectCommentsError = createSelector(selectConcertState, (state) => state.commentsError);
+export const selectReservations = createSelector(selectConcertState, (state) => state.reservations);
+export const selectReservationsStatus = createSelector(selectConcertState, (state) => state.reservationsStatus);
+export const selectReservationsError = createSelector(selectConcertState, (state) => state.reservationsError);
+export const selectAttendees = createSelector(selectConcertState, (state) => state.attendees);
+export const selectAttendeesStatus = createSelector(selectConcertState, (state) => state.attendeesStatus);
+export const selectAttendeesError = createSelector(selectConcertState, (state) => state.attendeesError);
+export const selectMyShows = createSelector(
+  [selectConcerts, (state) => state.auth.user?.id],
+  (concerts, userId) => userId ? concerts.filter((concert) => concert.ownerId === String(userId)) : [],
+);
 
 export const selectFilteredConcerts = createSelector(
   [selectConcerts, selectConcertSearch, selectConcertGenre],

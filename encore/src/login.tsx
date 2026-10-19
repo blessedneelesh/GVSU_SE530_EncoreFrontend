@@ -1,5 +1,8 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from './redux/hooks';
+import { login } from './redux/auth/auth.actions';
+import { selectAuthError, selectAuthStatus, selectIsAuthenticated } from './redux/auth/auth.selectors';
 import './Login.css';
 
 type DemoAccount = {
@@ -15,21 +18,26 @@ const demoAccounts: DemoAccount[] = [
 
 function Login() {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const authStatus = useAppSelector(selectAuthStatus);
+  const authError = useAppSelector(selectAuthError);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) navigate('/discover', { replace: true });
+  }, [isAuthenticated, navigate]);
 
   function handleDemoAccount(account: DemoAccount) {
     setEmail(account.email);
     setPassword('pass123');
-    setSubmitted(false);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmitted(true);
-    navigate('/dashboard');
+    dispatch(login({ email: email.trim(), password }));
   }
 
   return (
@@ -96,14 +104,10 @@ function Login() {
             </button>
           </div>
 
-          <button type="submit" className="login-submit">
-            Sign In
+          <button type="submit" className="login-submit" disabled={authStatus === 'loading'}>
+            {authStatus === 'loading' ? 'Signing in...' : 'Sign In'}
           </button>
-          {submitted && (
-            <p className="login-success" role="status">
-              Sign-in request received.
-            </p>
-          )}
+          {authError && <p className="login-error" role="alert">{authError}</p>}
         </form>
 
         <p className="login-signup">

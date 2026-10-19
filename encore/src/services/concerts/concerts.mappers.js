@@ -4,6 +4,7 @@ export function mapConcert(concert) {
   return {
     ...source,
     id: String(source.id ?? source.concertId),
+    ownerId: String(source.owner_id ?? source.ownerId ?? source.organizerId ?? ''),
     title: source.title ?? source.name ?? 'Untitled concert',
     category: source.category ?? source.genre ?? 'Live music',
     genre: source.genre ?? source.category ?? 'Live music',
@@ -16,6 +17,7 @@ export function mapConcert(concert) {
     capacity: Number.isFinite(source.capacity) ? source.capacity : null,
     reservedCount: Number.isFinite(source.reservedCount) ? source.reservedCount : (Number.isFinite(source.reserved_count) ? source.reserved_count : 0),
     cancelled: Boolean(source.cancelled),
+    comments: Array.isArray(source.comments) ? source.comments : [],
   };
 }
 
