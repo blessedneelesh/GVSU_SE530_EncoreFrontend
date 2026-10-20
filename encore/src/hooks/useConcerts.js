@@ -1,6 +1,19 @@
 import { useCallback, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
-import { createComment, createConcert, loadConcerts, loadConcert, loadConcertAttendees, loadConcertComments, loadMyReservations, reserveConcert, resetReservation, setConcertGenre, setConcertSearch } from '../redux/concerts/concerts.actions';
+import {
+  createComment,
+  createConcert,
+  loadConcerts,
+  loadConcert,
+  loadConcertAttendees,
+  loadConcertComments,
+  loadConcertLocationWeather,
+  loadMyReservations,
+  reserveConcert,
+  resetReservation,
+  setConcertGenre,
+  setConcertSearch,
+} from '../redux/concerts/concerts.actions';
 import {
   selectConcertDetailError,
   selectConcertDetailStatus,
@@ -26,6 +39,9 @@ import {
   selectAttendees,
   selectAttendeesStatus,
   selectAttendeesError,
+  selectLocationWeather,
+  selectLocationWeatherStatus,
+  selectLocationWeatherError,
 } from '../redux/concerts/concerts.selectors';
 
 export function useConcerts(concertId) {
@@ -55,12 +71,16 @@ export function useConcerts(concertId) {
   const attendees = useAppSelector(selectAttendees);
   const attendeesStatus = useAppSelector(selectAttendeesStatus);
   const attendeesError = useAppSelector(selectAttendeesError);
+  const locationWeather = useAppSelector(selectLocationWeather);
+  const locationWeatherStatus = useAppSelector(selectLocationWeatherStatus);
+  const locationWeatherError = useAppSelector(selectLocationWeatherError);
 
   useEffect(() => {
     if (concertId) {
       dispatch(loadConcert(concertId));
       dispatch(loadConcertComments(concertId));
       dispatch(loadConcertAttendees(concertId));
+      dispatch(loadConcertLocationWeather(concertId));
     } else {
       dispatch(loadConcerts());
     }
@@ -91,6 +111,9 @@ export function useConcerts(concertId) {
     attendees,
     attendeesStatus,
     attendeesError,
+    locationWeather,
+    locationWeatherStatus,
+    locationWeatherError,
     setSearch: (value) => dispatch(setConcertSearch(value)),
     setGenre: (value) => dispatch(setConcertGenre(value)),
     retry: () => dispatch(concertId ? loadConcert(concertId) : loadConcerts()),

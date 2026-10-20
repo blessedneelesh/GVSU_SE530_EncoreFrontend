@@ -25,6 +25,9 @@ const initialState = {
   attendees: [],
   attendeesStatus: 'idle',
   attendeesError: null,
+  locationWeather: null,
+  locationWeatherStatus: 'idle',
+  locationWeatherError: null,
   search: '',
   genre: 'All',
 };
@@ -115,6 +118,12 @@ export default function concertsReducer(state = initialState, action) {
       return { ...state, attendees: action.payload.attendees, attendeesStatus: 'success', attendeesError: null };
     case CONCERT_ACTIONS.LOAD_ATTENDEES_FAILURE:
       return { ...state, attendees: [], attendeesStatus: 'error', attendeesError: action.payload };
+    case CONCERT_ACTIONS.LOAD_LOCATION_WEATHER:
+      return { ...state, locationWeather: null, locationWeatherStatus: 'loading', locationWeatherError: null };
+    case CONCERT_ACTIONS.LOAD_LOCATION_WEATHER_SUCCESS:
+      return { ...state, locationWeather: action.payload, locationWeatherStatus: 'success', locationWeatherError: null };
+    case CONCERT_ACTIONS.LOAD_LOCATION_WEATHER_FAILURE:
+      return { ...state, locationWeather: null, locationWeatherStatus: 'error', locationWeatherError: action.payload };
     case CONCERT_ACTIONS.SET_SEARCH:
       return { ...state, search: action.payload };
     case CONCERT_ACTIONS.SET_GENRE:
