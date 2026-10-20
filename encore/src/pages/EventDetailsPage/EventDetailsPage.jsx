@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useConcerts } from '../../hooks/useConcerts';
+import { useAppSelector } from '../../redux/hooks';
 
 export default function EventDetailsPage() {
   const { eventId } = useParams();
+  const authUser = useAppSelector((state) => state.auth.user);
+  const authState = useAppSelector((state) => state.auth);
   const {
     selected: concert,
     detailStatus,
@@ -24,11 +27,13 @@ export default function EventDetailsPage() {
     locationWeatherStatus,
     locationWeatherError,
   } = useConcerts(eventId);
+
   const [imageFailed, setImageFailed] = useState(false);
   const [activeTab, setActiveTab] = useState('about');
   const [isReservationOpen, setIsReservationOpen] = useState(false);
   const [seatCount, setSeatCount] = useState(1);
   const [commentText, setCommentText] = useState('');
+  const [isCancelling, setIsCancelling] = useState(false);
   const closeButtonRef = useRef(null);
 
   useEffect(() => {
@@ -50,6 +55,8 @@ export default function EventDetailsPage() {
   if (!concert) {
     return <div className="state-panel"><h1>Concert not found</h1><Link className="outline-button" to="/discover">Back to discover</Link></div>;
   }
+
+  const isOwner = authUser && String(concert.ownerId) === String(authUser.id);
   const remainingSpots = concert.capacity === null ? null : Math.max(concert.capacity - concert.reservedCount, 0);
   const availability = concert.capacity === null
     ? 'Capacity information unavailable'
@@ -58,6 +65,33 @@ export default function EventDetailsPage() {
   const commentCount = comments.length;
   const hasCommentText = commentText.trim().length > 0;
   const moodTheme = concert.moodTheme || { label: concert.mood || 'Happy', color: '#facc15', bg: 'rgba(250, 204, 21, 0.14)', border: '#eab308' };
+
+  async function handleCancelShow() {
+    if (concert.cancelled) return;
+    try {
+      setIsCancelling(true);
+      const token = authState?.accessToken || JSON.parse(localStorage.getItem('encoreAuth') || '{}')?.accessToken;
+      
+      const response = await fetch(`http://127.0.0.1:8000/api/v1/concerts/${concert.id}/cancel`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Failed to cancel show.');
+      }
+
+      window.location.reload();
+    } catch (err) {
+      alert(err.message || 'Failed to cancel show.');
+    } finally {
+      setIsCancelling(false);
+    }
+  }
 
   return (
     <article className="event-details">
@@ -139,10 +173,12 @@ export default function EventDetailsPage() {
           </div>
         </div>
       </section>
-      <section className="event-booking-panel" aria-label="Concert availability">
+
+      {/* Booking or Organizer Management Panel */}
+      <section className="event-booking-panel" aria-label="Concert availability and management">
         <div>
-          <p className="eyebrow">Make it a night out</p>
-          <h2>Reserve your spot</h2>
+          <p className="eyebrow">{isOwner ? 'Organizer Controls' : 'Make it a night out'}</p>
+          <h2>{isOwner ? 'Manage your show' : 'Reserve your spot'}</h2>
           <p className="muted">{availability}</p>
         </div>
         <div className="availability-count">
@@ -150,22 +186,62 @@ export default function EventDetailsPage() {
           <span>spots left</span>
         </div>
         <div className="event-actions">
-          <button className="accent-button" type="button" disabled={concert.cancelled || remainingSpots === 0} onClick={() => { resetReservation(); setSeatCount(1); setIsReservationOpen(true); }}>
-            {concert.cancelled ? 'Reservations closed' : remainingSpots === 0 ? 'Sold out' : 'Reserve a spot'}
-          </button>
-          <Link className="outline-button" to="/organizer">View my events</Link>
+          {isOwner ? (
+            <>
+              {concert.cancelled ? (
+                <button
+                  className="accent-button"
+                  type="button"
+                  disabled
+                  style={{ cursor: 'not-allowed', background: '#ffad00', opacity: 0.9 }}
+                >
+                  Reservations closed
+                </button>
+              ) : (
+                <button
+                  className="outline-button"
+                  type="button"
+                  disabled={isCancelling}
+                  onClick={handleCancelShow}
+                  style={{
+                    cursor: 'pointer',
+                    borderColor: '#8b3f49',
+                    color: '#ffd6d6',
+                    background: 'rgba(139, 63, 73, 0.2)',
+                  }}
+                >
+                  {isCancelling ? 'Cancelling...' : 'Cancel Show'}
+                </button>
+              )}
+              <Link className="outline-button" to="/organizer" style={{ cursor: 'pointer' }}>Back to My Shows</Link>
+            </>
+          ) : (
+            <>
+              <button
+                className="accent-button"
+                type="button"
+                disabled={concert.cancelled || remainingSpots === 0}
+                onClick={() => { resetReservation(); setSeatCount(1); setIsReservationOpen(true); }}
+                style={{ cursor: concert.cancelled || remainingSpots === 0 ? 'not-allowed' : 'pointer' }}
+              >
+                {concert.cancelled ? 'Reservations closed' : remainingSpots === 0 ? 'Sold out' : 'Reserve a spot'}
+              </button>
+              <Link className="outline-button" to="/organizer" style={{ cursor: 'pointer' }}>View my events</Link>
+            </>
+          )}
         </div>
       </section>
+
       {isReservationOpen && (
         <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && reservationStatus !== 'loading') setIsReservationOpen(false); }}>
           <section className="reservation-modal" role="dialog" aria-modal="true" aria-labelledby="reservation-title">
-            <button className="modal-close" ref={closeButtonRef} type="button" aria-label="Close reservation form" disabled={reservationStatus === 'loading'} onClick={() => setIsReservationOpen(false)}>×</button>
+            <button className="modal-close" ref={closeButtonRef} type="button" aria-label="Close reservation form" disabled={reservationStatus === 'loading'} onClick={() => setIsReservationOpen(false)} style={{ cursor: 'pointer' }}>×</button>
             {reservationStatus === 'success' ? (
               <div className="reservation-success" role="status">
                 <p className="eyebrow">You’re on the list</p>
                 <h2 id="reservation-title">Reservation confirmed.</h2>
                 <p className="muted">Your spot for {concert.title} is reserved. We’ll see you there.</p>
-                <button className="accent-button" type="button" onClick={() => setIsReservationOpen(false)}>Done</button>
+                <button className="accent-button" type="button" onClick={() => setIsReservationOpen(false)} style={{ cursor: 'pointer' }}>Done</button>
               </div>
             ) : (
               <>
@@ -194,6 +270,7 @@ export default function EventDetailsPage() {
                           disabled={remainingSpots !== null && count > Math.min(remainingSpots, 4)}
                           aria-pressed={seatCount === count}
                           onClick={() => setSeatCount(count)}
+                          style={{ cursor: remainingSpots !== null && count > Math.min(remainingSpots, 4) ? 'not-allowed' : 'pointer' }}
                         >
                           {count}
                         </button>
@@ -202,8 +279,8 @@ export default function EventDetailsPage() {
                     <p className="seat-availability">{remainingSpots === null ? 'Availability information unavailable' : `${remainingSpots} seats available · max 4 per reservation`}</p>
                   </fieldset>
                   <div className="reservation-actions">
-                    <button className="outline-button" type="button" disabled={reservationStatus === 'loading'} onClick={() => setIsReservationOpen(false)}>Cancel</button>
-                    <button className="accent-button" type="submit" disabled={reservationStatus === 'loading'}>
+                    <button className="outline-button" type="button" disabled={reservationStatus === 'loading'} onClick={() => setIsReservationOpen(false)} style={{ cursor: 'pointer' }}>Cancel</button>
+                    <button className="accent-button" type="submit" disabled={reservationStatus === 'loading'} style={{ cursor: 'pointer' }}>
                       {reservationStatus === 'loading' ? 'Reserving...' : `Confirm ${seatCount} seat${seatCount === 1 ? '' : 's'}`}
                     </button>
                   </div>
@@ -213,6 +290,7 @@ export default function EventDetailsPage() {
           </section>
         </div>
       )}
+
       <section className="event-information" aria-label="Concert information">
         <div className="event-tabs" role="tablist" aria-label="Concert details">
           {[
@@ -229,6 +307,7 @@ export default function EventDetailsPage() {
               aria-selected={activeTab === tabId}
               type="button"
               onClick={() => setActiveTab(tabId)}
+              style={{ cursor: 'pointer' }}
             >
               {label}
             </button>
@@ -308,7 +387,7 @@ export default function EventDetailsPage() {
               {commentError && <p className="form-error" role="alert">{commentError}</p>}
               <div className="comment-form-footer">
                 <span>{commentText.length}/1000</span>
-                <button className="accent-button" type="submit" disabled={!hasCommentText || commentStatus === 'loading'}>
+                <button className="accent-button" type="submit" disabled={!hasCommentText || commentStatus === 'loading'} style={{ cursor: !hasCommentText || commentStatus === 'loading' ? 'not-allowed' : 'pointer' }}>
                   {commentStatus === 'loading' ? 'Posting...' : 'Post comment'}
                 </button>
               </div>
