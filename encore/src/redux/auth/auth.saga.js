@@ -30,7 +30,9 @@ function* loginWorker(action) {
       if (!user) throw profileError;
     }
     const auth = { accessToken, refreshToken, user };
-    localStorage.setItem('encoreAuth', JSON.stringify(auth));
+    // Clear any stale localStorage auth so sessionStorage is the single source of truth per tab
+    localStorage.removeItem('encoreAuth');
+    sessionStorage.setItem('encoreAuth', JSON.stringify(auth));
     yield put({ type: AUTH_ACTIONS.LOGIN_SUCCESS, payload: auth });
   } catch (error) {
     yield put({ type: AUTH_ACTIONS.LOGIN_FAILURE, payload: getAuthErrorMessage(error) });
@@ -50,6 +52,7 @@ function* registerWorker(action) {
 }
 
 function* logoutWorker() {
+  yield call([sessionStorage, 'removeItem'], 'encoreAuth');
   yield call([localStorage, 'removeItem'], 'encoreAuth');
 }
 

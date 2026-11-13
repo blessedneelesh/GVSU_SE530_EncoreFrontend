@@ -44,7 +44,7 @@ export default function SignupPage() {
           <h1 id="signup-heading">Join Encore</h1>
           <p>Create an account to discover and reserve unforgettable events.</p>
         </div>
-        <form className="login-form" onSubmit={handleSubmit}>
+        <form className="login-form" onSubmit={handleSubmit} autocomplete="off">
           <label htmlFor="signup-name">Name</label>
           <input
             id="signup-name"
