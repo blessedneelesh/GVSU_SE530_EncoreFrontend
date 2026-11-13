@@ -75,7 +75,7 @@ function Login() {
             name="email"
             type="email"
             placeholder="you@encore.fm"
-            autoComplete="email"
+            autoComplete="one-time-code."
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             required
@@ -88,7 +88,7 @@ function Login() {
               name="password"
               type={showPassword ? 'text' : 'password'}
               placeholder="••••••••"
-              autoComplete="current-password"
+              autoComplete="new-password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               required

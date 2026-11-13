@@ -116,7 +116,16 @@ export function useConcerts(concertId) {
     locationWeatherError,
     setSearch: (value) => dispatch(setConcertSearch(value)),
     setGenre: (value) => dispatch(setConcertGenre(value)),
-    retry: () => dispatch(concertId ? loadConcert(concertId) : loadConcerts()),
+    retry: () => {
+      if (concertId) {
+        dispatch(loadConcert(concertId));
+        dispatch(loadConcertComments(concertId));
+        dispatch(loadConcertAttendees(concertId));
+        dispatch(loadConcertLocationWeather(concertId));
+      } else {
+        dispatch(loadConcerts());
+      }
+    },
     reserve: (reservationDetails) => dispatch(reserveConcert(concertId, reservationDetails)),
     resetReservation: () => dispatch(resetReservation()),
     create: (concert) => dispatch(createConcert(concert)),

@@ -8,9 +8,19 @@ export const apiClient = axios.create({
   headers: { Accept: 'application/json' },
 });
 
+function getStoredAuth() {
+  const raw = sessionStorage.getItem('encoreAuth') || localStorage.getItem('encoreAuth');
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
 apiClient.interceptors.request.use((config) => {
-  const storedAuth = JSON.parse(localStorage.getItem('encoreAuth') || 'null');
-  const accessToken = storedAuth?.accessToken || storedAuth?.access_token;
+  const storedAuth = getStoredAuth();
+  const accessToken = storedAuth?.accessToken || storedAuth?.access_token || storedAuth?.token;
   if (accessToken) {
     config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${accessToken}`;
@@ -22,7 +32,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    const storedAuth = JSON.parse(localStorage.getItem('encoreAuth') || 'null');
+    const storedAuth = getStoredAuth();
     const refreshToken = storedAuth?.refreshToken || storedAuth?.refresh_token;
 
     if (error.response?.status !== 401 || !refreshToken || originalRequest?._retry) {
@@ -42,11 +52,12 @@ apiClient.interceptors.response.use(
         accessToken,
         refreshToken: response.refresh_token || response.refresh || response.refreshToken || refreshToken,
       };
-      localStorage.setItem('encoreAuth', JSON.stringify(nextAuth));
+      sessionStorage.setItem('encoreAuth', JSON.stringify(nextAuth));
       originalRequest.headers = originalRequest.headers || {};
       originalRequest.headers.Authorization = `Bearer ${accessToken}`;
       return apiClient(originalRequest);
     } catch (refreshError) {
+      sessionStorage.removeItem('encoreAuth');
       localStorage.removeItem('encoreAuth');
       return Promise.reject(refreshError);
     }

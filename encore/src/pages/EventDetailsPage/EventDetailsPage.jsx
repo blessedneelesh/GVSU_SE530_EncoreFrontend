@@ -2,24 +2,24 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useConcerts } from '../../hooks/useConcerts';
 import { useAppSelector } from '../../redux/hooks';
+import { apiClient } from '../../services/api/apiClient';
 
 export default function EventDetailsPage() {
   const { eventId } = useParams();
   const authUser = useAppSelector((state) => state.auth.user);
-  const authState = useAppSelector((state) => state.auth);
   const {
     selected: concert,
     detailStatus,
     detailError,
     retry,
-    reserve,
     reservationStatus,
     reservationError,
+    reserve,
     resetReservation,
-    comment,
     commentStatus,
     commentError,
     commentsStatus,
+    comment,
     attendees,
     attendeesStatus,
     attendeesError,
@@ -34,6 +34,7 @@ export default function EventDetailsPage() {
   const [seatCount, setSeatCount] = useState(1);
   const [commentText, setCommentText] = useState('');
   const [isCancelling, setIsCancelling] = useState(false);
+
   const closeButtonRef = useRef(null);
 
   useEffect(() => {
@@ -70,27 +71,27 @@ export default function EventDetailsPage() {
     if (concert.cancelled) return;
     try {
       setIsCancelling(true);
-      const token = authState?.accessToken || JSON.parse(localStorage.getItem('encoreAuth') || '{}')?.accessToken;
-      
-      const response = await fetch(`http://127.0.0.1:8000/api/v1/concerts/${concert.id}/cancel`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || 'Failed to cancel show.');
-      }
-
-      window.location.reload();
+      await apiClient.patch(`${encodeURIComponent(concert.id)}/cancel`);
+      retry();
     } catch (err) {
-      alert(err.message || 'Failed to cancel show.');
+      const detail = err?.response?.data?.detail || err?.message || 'Failed to cancel show.';
+      alert(typeof detail === 'string' ? detail : JSON.stringify(detail));
     } finally {
       setIsCancelling(false);
     }
+  }
+
+  function handleReserveSeats(event) {
+    event.preventDefault();
+    reserve({ seats: seatCount });
+  }
+
+  function handlePostComment(event) {
+    event.preventDefault();
+    const value = commentText.trim();
+    if (!value || commentStatus === 'loading') return;
+    comment(value);
+    setCommentText('');
   }
 
   return (
@@ -174,7 +175,6 @@ export default function EventDetailsPage() {
         </div>
       </section>
 
-      {/* Booking or Organizer Management Panel */}
       <section className="event-booking-panel" aria-label="Concert availability and management">
         <div>
           <p className="eyebrow">{isOwner ? 'Organizer Controls' : 'Make it a night out'}</p>
@@ -226,7 +226,7 @@ export default function EventDetailsPage() {
               >
                 {concert.cancelled ? 'Reservations closed' : remainingSpots === 0 ? 'Sold out' : 'Reserve a spot'}
               </button>
-              <Link className="outline-button" to="/organizer" style={{ cursor: 'pointer' }}>View my events</Link>
+              <Link className="outline-button" to="/reservations" style={{ cursor: 'pointer' }}>View my reservations</Link>
             </>
           )}
         </div>
@@ -258,7 +258,7 @@ export default function EventDetailsPage() {
                   <span>{concert.location}</span>
                 </div>
                 {reservationError && <p className="form-error" role="alert">{reservationError}</p>}
-                <form className="reservation-form" onSubmit={(event) => { event.preventDefault(); reserve({ seats: seatCount }); }}>
+                <form className="reservation-form" onSubmit={handleReserveSeats} autoComplete="off">
                   <fieldset className="seat-selection">
                     <legend>How many seats?</legend>
                     <div className="seat-options">
@@ -366,17 +366,11 @@ export default function EventDetailsPage() {
                 })}
               </div>
             )}
-            <form className="comment-form" onSubmit={(event) => {
-              event.preventDefault();
-              const value = commentText.trim();
-              if (value && commentStatus !== 'loading') {
-                comment(value);
-                setCommentText('');
-              }
-            }}>
+            <form className="comment-form" onSubmit={handlePostComment} autoComplete="off">
               <label htmlFor="show-comment">Share your thoughts</label>
               <textarea
                 id="show-comment"
+                autoComplete="off"
                 value={commentText}
                 onChange={(event) => setCommentText(event.target.value)}
                 placeholder="Write a comment..."

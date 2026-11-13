@@ -1,6 +1,6 @@
 import { AUTH_ACTIONS } from './auth.constants';
 
-const storedAuth = JSON.parse(localStorage.getItem('encoreAuth') || 'null');
+const storedAuth = JSON.parse(sessionStorage.getItem('encoreAuth') || 'null');
 
 const initialState = {
   accessToken: storedAuth?.accessToken || storedAuth?.access_token || null,
